@@ -14,7 +14,7 @@
 Sistem knowledge graph berbasis Neo4j AuraDB yang memodelkan jaringan politik Indonesia secara komprehensif — mencakup **52.295 politikus**, **156 partai**, dan **881 institusi pendidikan**. Pipeline AI terintegrasi memungkinkan pengguna berinteraksi dengan graf melalui bahasa alami (Bahasa Indonesia), mengekstrak entitas dari teks berita, dan mendapatkan jawaban yang diperkaya konteks graf.
 
 **Dataset:** ~52K+ nodes, multi-relasi (keanggotaan partai, alumni pendidikan, jaringan kerabat/dinasti)  
-**Dataset:** Diambil dari github ,hasil dari query di wikipedia pada tugas ETS kemarin
+**Dataset:** Diambil dari github ,hasil dari query di wikipedia pada tugas ETS kemarin,anda bisa melihat dokumentasi dataset tersebut di repositori di bawah ini ,anda juga bisa import data langsung di neo4j menggunakan cypher tanpa menggunakan kode python dengan melihat dokumentasinya.
 `https://github.com/ibrahimamar07/Graf-Data-Politikus-Indonesia`
 
 ---
