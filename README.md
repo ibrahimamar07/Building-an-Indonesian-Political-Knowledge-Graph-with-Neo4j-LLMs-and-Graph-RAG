@@ -14,7 +14,8 @@
 Sistem knowledge graph berbasis Neo4j AuraDB yang memodelkan jaringan politik Indonesia secara komprehensif — mencakup **52.295 politikus**, **156 partai**, dan **881 institusi pendidikan**. Pipeline AI terintegrasi memungkinkan pengguna berinteraksi dengan graf melalui bahasa alami (Bahasa Indonesia), mengekstrak entitas dari teks berita, dan mendapatkan jawaban yang diperkaya konteks graf.
 
 **Dataset:** ~52K+ nodes, multi-relasi (keanggotaan partai, alumni pendidikan, jaringan kerabat/dinasti)  
-**Nilai Target:** Tier 4 → 90–100
+**Dataset:** Diambil dari github ,hasil dari query di wikipedia pada tugas ETS kemarin
+`https://github.com/ibrahimamar07/Graf-Data-Politikus-Indonesia`
 
 ---
 
@@ -403,31 +404,6 @@ Sesuai ketentuan mata kuliah, seluruh penggunaan AI generatif untuk menghasilkan
 
 ---
 
-### Cell 2 — Koneksi Neo4j & Helper Functions
-
-**Model:** `claude-sonnet-4-6` (via claude.ai)
-
-**Prompt yang dipakai:**
-
-```
-Buat fungsi Python untuk:
-1. Koneksi ke Neo4j AuraDB menggunakan neo4j driver
-2. Helper run_query(cypher, params) yang return list of dicts
-3. Helper call_llm(system_prompt, user_prompt, temperature) yang hit OpenRouter API
-   dengan header HTTP-Referer dan X-Title
-4. Test koneksi dan test LLM setelah inisialisasi
-```
-
-**Output AI:** Struktur fungsi dasar `run_query()` dan `call_llm()` dengan `requests.post` ke OpenRouter endpoint.
-
-**Modifikasi manual:**
-
-- Menambahkan header `"HTTP-Referer": "https://colab.research.google.com"` dan `"X-Title": "Graf-Politikus-Indonesia"` — diperlukan oleh OpenRouter untuk rate limit tracking
-- Mengubah `timeout=30` → `timeout=60` karena model free di OpenRouter memiliki cold-start yang lebih lambat
-- Menambahkan try/except terpisah untuk test koneksi dan test LLM agar error tidak saling memblokir
-
----
-
 ### Cell 3 — Import Dataset ke Neo4j AuraDB
 
 **Model:** `claude-sonnet-4-6` (via claude.ai)
@@ -477,32 +453,6 @@ Buat kode Neo4j GDS untuk:
 - Menambahkan blok `try: run_query("CALL gds.graph.drop('graf_politik', false)")` sebelum projection — AI tidak menyertakan cleanup projection lama, menyebabkan error `GraphAlreadyExists` saat re-run
 - Mengubah query top PageRank agar filter `p.nama <> ''` — menghindari politikus dengan nama kosong muncul di ranking
 - Menambahkan blok `GDS_AVAILABLE = True/False` sebagai flag agar fallback Cypher hanya aktif ketika GDS benar-benar gagal
-
----
-
-### Cell 5 — Text-to-Cypher (Komponen 1)
-
-**Model:** `claude-sonnet-4-6` (via claude.ai)
-
-**Prompt yang dipakai:**
-
-```
-Buat pipeline Text-to-Cypher untuk Neo4j dengan:
-- System prompt berisi schema graf lengkap (node labels, properties, relationship types)
-  dan contoh few-shot Q→A
-- Fungsi text_to_cypher(question) yang strip markdown fence dari output LLM
-- Fungsi ask_graph(question) dengan self-repair: jika query error,
-  kirim ulang (query + error message) ke LLM untuk diperbaiki
-- Demo 4 pertanyaan contoh
-```
-
-**Output AI:** Struktur `TEXT_TO_CYPHER_SYSTEM`, fungsi `text_to_cypher()`, dan `ask_graph()` dengan retry logic.
-
-**Modifikasi manual:**
-
-- Menambahkan penanganan `KeyError` dan `Exception` umum secara terpisah pada `text_to_cypher()` — AI hanya generate generic `except Exception` yang tidak memberikan pesan debug yang cukup informatif
-- Menambahkan `return None` pada branch error dan pengecekan `if cypher is None` di `ask_graph()` — tanpa ini, `run_query(None)` akan raise `TypeError` yang membingungkan
-- Memperluas `GRAPH_SCHEMA` dengan menambahkan aturan eksplisit: "Gunakan CONTAINS dan toLower() untuk pencarian nama" dan "Selalu tambahkan LIMIT (max 20)" — diperlukan karena LLM sering generate query case-sensitive atau tanpa LIMIT
 
 ---
 
@@ -586,25 +536,11 @@ Buat blok evaluasi untuk menguji keempat komponen secara otomatis:
 
 ---
 
-### Ringkasan Kontribusi AI vs Manual
-
-| Komponen              | % Kode dari AI | Modifikasi Utama                                       |
-| --------------------- | -------------- | ------------------------------------------------------ |
-| Koneksi & Helper      | ~70%           | Header OpenRouter, timeout, error isolation            |
-| Import Dataset        | ~60%           | Null filter, dangling edge guard, KERABAT property     |
-| Graph Analytics (GDS) | ~75%           | Drop projection guard, nama filter, GDS flag           |
-| Text-to-Cypher        | ~65%           | `return None` guard, error separation, schema rules    |
-| Graph Builder         | ~60%           | Label sanitasi, dual-path JSON parse, debug print      |
-| RAG Pipeline          | ~55%           | Tambah 3 query konteks, keyword expansion, temperature |
-| Evaluasi              | ~70%           | Timing, distinct fix, per-block try/except             |
-
-> Seluruh system prompt untuk LLM (TEXT_TO_CYPHER_SYSTEM, GRAPH_BUILDER_SYSTEM, RAG_SYSTEM) ditulis manual karena kualitas prompt engineering menentukan akurasi output ketiga komponen AI di runtime.
-
 ---
 
 ## Author
 
-**Ibrahim Amar** — `ibrahimamar07`  
+**Ibrahim Amar** — `ibrahimamar07`
 Institut Teknologi Sepuluh Nopember (ITS), Surabaya  
 Program Studi Sistem Informasi — Semester 6  
-Mata Kuliah: Knowledge Graphs & Graph Databases
+Mata Kuliah: Knowledge Graphs
