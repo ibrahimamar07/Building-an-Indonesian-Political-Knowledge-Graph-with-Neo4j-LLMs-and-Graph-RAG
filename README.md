@@ -1,4 +1,5 @@
 # Graf Politikus Indonesia — Tier 4
+
 > Knowledge Graph + LLM Pipeline: Text-to-Cypher | Graph Builder | GraphRAG
 
 [![Python](https://img.shields.io/badge/Python-3.10-blue)](https://python.org)
@@ -20,52 +21,19 @@ Sistem knowledge graph berbasis Neo4j AuraDB yang memodelkan jaringan politik In
 ## Arsitektur Sistem
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    TIGA KOMPONEN UTAMA                       │
-└─────────────────────────────────────────────────────────────┘
-
-[Natural Language Query]
-         │
-         ▼
-┌─────────────────────┐
-│  Komponen 1         │  ← LLM menerjemahkan NL → Cypher
-│  Text-to-Cypher     │
-└────────┬────────────┘
-         │ Cypher Query
-         ▼
-┌─────────────────────┐
-│  Neo4j AuraDB       │  ← Graf cloud 50K+ nodes
-│  Graph Database     │
-└────────┬────────────┘
-         │ Graph Results
-         ▼
-┌─────────────────────┐
-│  Komponen 3         │  ← Graph-Augmented Retrieval
-│  RAG Pipeline       │
-└────────┬────────────┘
-         │ Augmented Answer
-         ▼
-    [Final Response]
-
-[Unstructured Text / Berita]
-         │
-         ▼
-┌─────────────────────┐
-│  Komponen 2         │  ← LLM ekstrak entitas → Neo4j
-│  Graph Builder      │
-└─────────────────────┘
+imagepipeline.png
 ```
 
 ### Stack Teknologi
 
-| Layer | Teknologi |
-|-------|-----------|
-| Graph Database | Neo4j AuraDB (cloud, free tier) |
+| Layer           | Teknologi                                         |
+| --------------- | ------------------------------------------------- |
+| Graph Database  | Neo4j AuraDB (cloud, free tier)                   |
 | Graph Analytics | Neo4j GDS Plugin (PageRank, Betweenness, Louvain) |
-| LLM Gateway | OpenRouter API (free models) |
-| LLM Model | `nvidia/nemotron-3-ultra-550b-a55b:free` (atau model gratis lain) |
-| Runtime | Python 3.10, Google Colab |
-| Libraries | `neo4j`, `requests`, `pandas`, `tqdm` |
+| LLM Gateway     | OpenRouter API (free models)                      |
+| LLM Model       | `nvidia/nemotron-3-ultra-550b-a55b:free`          |
+| Runtime         | Python 3.10, Google Colab                         |
+| Libraries       | `neo4j`, `requests`, `pandas`, `tqdm`             |
 
 ---
 
@@ -84,8 +52,6 @@ Pendidikan  { kodeId: string, nama: string }
 
 Person      { kodeId: string, nama: string }
 
-BeritaEntity { extractedId: string, nama: string,
-               tipe: string, source: string }   ← dari Graph Builder
 ```
 
 ### Relationship Types
@@ -95,17 +61,16 @@ BeritaEntity { extractedId: string, nama: string,
 (Politikus)-[:ALUMNI]->(Pendidikan)
 (Politikus)-[:KERABAT {tipe: string}]->(Politikus)
 (Politikus)-[:KERABAT {tipe: string}]->(Person)
-(BeritaEntity)-[:REFERS_TO]->(Politikus|Partai)   ← link ke graf utama
 ```
 
 ### Statistik Dataset
 
-| Label | Jumlah Nodes |
-|-------|-------------|
-| Politikus | ~52.295 |
-| Partai | ~156 |
-| Pendidikan | ~881 |
-| Person | (kerabat non-politikus) |
+| Label      | Jumlah Nodes            |
+| ---------- | ----------------------- |
+| Politikus  | ~52.295                 |
+| Partai     | ~156                    |
+| Pendidikan | ~881                    |
+| Person     | (kerabat non-politikus) |
 
 ---
 
@@ -113,7 +78,7 @@ BeritaEntity { extractedId: string, nama: string,
 
 ### 1. Buka di Google Colab
 
-Upload file `Graf_Politikus_Indonesia_Tier4.ipynb` ke Google Colab atau buka langsung dari Google Drive.
+Upload file `Graf_Politikus_Indonesia.ipynb` ke Google Colab atau buka langsung dari Google Drive.
 
 ### 2. Install Dependencies
 
@@ -167,19 +132,19 @@ FREE_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
 
 Jalankan cell secara berurutan:
 
-| Cell | Fungsi | Estimasi Waktu |
-|------|--------|----------------|
-| **Cell 0** | Install dependencies | ~1 menit |
-| **Cell 1** | Konfigurasi credentials | — |
-| **Cell 2** | Koneksi Neo4j + test LLM | ~10 detik |
-| **Cell 3** | Import dataset (52K nodes) | **10–20 menit** |
-| **Cell 4** | Graph Analytics (GDS) | ~5 menit |
-| **Cell 5** | Demo Text-to-Cypher | ~1 menit |
-| **Cell 6** | Demo Graph Builder | ~1 menit |
-| **Cell 7** | Demo RAG Pipeline | ~2 menit |
-| **Cell 8** | Interactive Chatbot | on-demand |
-| **Cell 9** | Evaluasi sistem | ~2 menit |
-| **Cell 10** | Custom query (opsional) | — |
+| Cell        | Fungsi                     | Estimasi Waktu  |
+| ----------- | -------------------------- | --------------- |
+| **Cell 0**  | Install dependencies       | ~1 menit        |
+| **Cell 1**  | Konfigurasi credentials    | —               |
+| **Cell 2**  | Koneksi Neo4j + test LLM   | ~10 detik       |
+| **Cell 3**  | Import dataset (52K nodes) | **10–20 menit** |
+| **Cell 4**  | Graph Analytics (GDS)      | ~5 menit        |
+| **Cell 5**  | Demo Text-to-Cypher        | ~1 menit        |
+| **Cell 6**  | Demo Graph Builder         | ~1 menit        |
+| **Cell 7**  | Demo RAG Pipeline          | ~2 menit        |
+| **Cell 8**  | Interactive Chatbot        | on-demand       |
+| **Cell 9**  | Evaluasi sistem            | ~2 menit        |
+| **Cell 10** | Custom query (opsional)    | —               |
 
 > **⚠️ Cell 3 harus dijalankan sekali saja.** Jalankan ulang hanya jika database direset. Gunakan constraint `MERGE` yang sudah ada untuk idempotency.
 
@@ -305,7 +270,7 @@ Hasil ditulis kembali ke properti node (`writeProperty`) sehingga bisa di-query 
 
 ### 3. Text-to-Cypher Pipeline
 
-```
+````
 [Pertanyaan NL]
       │
       ▼ call_llm(TEXT_TO_CYPHER_SYSTEM, question)
@@ -319,7 +284,7 @@ Hasil ditulis kembali ke properti node (`writeProperty`) sehingga bisa di-query 
       │
       ├─ OK → tampilkan hasil
       └─ Error → retry: kirim (query + error) ke LLM untuk self-repair
-```
+````
 
 **System Prompt Strategy:** LLM diberi schema lengkap (node labels, properties, relationship types) + contoh few-shot Q→A. Ini mengurangi hallucination query dan memastikan nama properti (`kodeId`, `pagerank`, dll.) digunakan secara tepat. `temperature=0.1` dipakai agar output deterministik.
 
@@ -367,6 +332,7 @@ Hasil ditulis kembali ke properti node (`writeProperty`) sehingga bisa di-query 
 **Keyword Routing vs. Semantic Search:** Sistem ini menggunakan rule-based keyword matching (bukan embedding similarity) untuk memilih query graf yang relevan. Pendekatan ini lebih cepat dan deterministik untuk domain yang terdefinisi — tapi kurang fleksibel untuk pertanyaan out-of-domain.
 
 **Augmented Prompt Pattern:**
+
 ```
 === KONTEKS DARI KNOWLEDGE GRAPH ===
 [Top Influencer data]
@@ -399,21 +365,22 @@ LLM hanya "mereformulasi" fakta dari graf — mengurangi risiko halusinasi diban
     └── edges_kerabat_person.csv
 ```
 
-Dataset CSV diambil langsung dari:  
+Dataset CSV diambil langsung dari hasil pengumpulan data di wikidata:  
+`https://github.com/ibrahimamar07/Graf-Data-Politikus-Indonesia`
 `https://raw.githubusercontent.com/ibrahimamar07/Graf-Data-Politikus-Indonesia/main/dataset_load_to_neo4j/`
 
 ---
 
 ## Troubleshooting
 
-| Masalah | Penyebab | Solusi |
-|---------|----------|--------|
-| `Koneksi gagal` | URI/password AuraDB salah | Cek credential di Neo4j Console |
-| `LLM error: KeyError 'choices'` | API key invalid / rate limit | Ganti API key atau model |
-| `GDS tidak tersedia` | Plugin tidak aktif | Notebook otomatis fallback ke Cypher degree |
-| Query error setelah retry | LLM generate query tidak valid | Coba pertanyaan yang lebih spesifik |
-| Import lambat | AuraDB free tier bandwidth limit | Normal, tunggu 10–20 menit |
-| `JSON Parsing Error` pada Graph Builder | LLM output tidak murni JSON | Dicatch dan return `{"entities": [], "relasi": []}` |
+| Masalah                                 | Penyebab                         | Solusi                                              |
+| --------------------------------------- | -------------------------------- | --------------------------------------------------- |
+| `Koneksi gagal`                         | URI/password AuraDB salah        | Cek credential di Neo4j Console                     |
+| `LLM error: KeyError 'choices'`         | API key invalid / rate limit     | Ganti API key atau model                            |
+| `GDS tidak tersedia`                    | Plugin tidak aktif               | Notebook otomatis fallback ke Cypher degree         |
+| Query error setelah retry               | LLM generate query tidak valid   | Coba pertanyaan yang lebih spesifik                 |
+| Import lambat                           | AuraDB free tier bandwidth limit | Normal, tunggu 10–20 menit                          |
+| `JSON Parsing Error` pada Graph Builder | LLM output tidak murni JSON      | Dicatch dan return `{"entities": [], "relasi": []}` |
 
 ---
 
@@ -441,6 +408,7 @@ Sesuai ketentuan mata kuliah, seluruh penggunaan AI generatif untuk menghasilkan
 **Model:** `claude-sonnet-4-6` (via claude.ai)
 
 **Prompt yang dipakai:**
+
 ```
 Buat fungsi Python untuk:
 1. Koneksi ke Neo4j AuraDB menggunakan neo4j driver
@@ -453,6 +421,7 @@ Buat fungsi Python untuk:
 **Output AI:** Struktur fungsi dasar `run_query()` dan `call_llm()` dengan `requests.post` ke OpenRouter endpoint.
 
 **Modifikasi manual:**
+
 - Menambahkan header `"HTTP-Referer": "https://colab.research.google.com"` dan `"X-Title": "Graf-Politikus-Indonesia"` — diperlukan oleh OpenRouter untuk rate limit tracking
 - Mengubah `timeout=30` → `timeout=60` karena model free di OpenRouter memiliki cold-start yang lebih lambat
 - Menambahkan try/except terpisah untuk test koneksi dan test LLM agar error tidak saling memblokir
@@ -464,6 +433,7 @@ Buat fungsi Python untuk:
 **Model:** `claude-sonnet-4-6` (via claude.ai)
 
 **Prompt yang dipakai:**
+
 ```
 Buat fungsi Python untuk import CSV dari URL GitHub ke Neo4j menggunakan LOAD CSV.
 Ada dua tipe: import_node dan import_edge.
@@ -476,6 +446,7 @@ ANGGOTA_PARTAI, ALUMNI, KERABAT (edges).
 **Output AI:** Skeleton fungsi `import_node()` dan `import_edge()` dengan `LOAD CSV WITH HEADERS`.
 
 **Modifikasi manual:**
+
 - Menambahkan filter `WHERE row.\`kodeId:ID\` IS NOT NULL AND row.\`kodeId:ID\` <> ''` — AI tidak menyertakan validasi baris kosong yang menyebabkan node phantom
 - Menambahkan double `MATCH` sebelum `MERGE` pada `import_edge()` untuk mencegah dangling edge jika salah satu endpoint belum ada
 - Menambahkan property `{tipe: row.tipe}` pada edge `KERABAT` — AI hanya generate `MERGE (a)-[:KERABAT]->(b)` tanpa property
@@ -488,6 +459,7 @@ ANGGOTA_PARTAI, ALUMNI, KERABAT (edges).
 **Model:** `claude-sonnet-4-6` (via claude.ai)
 
 **Prompt yang dipakai:**
+
 ```
 Buat kode Neo4j GDS untuk:
 - Membuat graph projection multi-label (Politikus, Partai, Pendidikan, Person)
@@ -501,6 +473,7 @@ Buat kode Neo4j GDS untuk:
 **Output AI:** Struktur `CALL gds.pageRank.write()`, `gds.betweenness.write()`, `gds.louvain.write()` yang sudah benar.
 
 **Modifikasi manual:**
+
 - Menambahkan blok `try: run_query("CALL gds.graph.drop('graf_politik', false)")` sebelum projection — AI tidak menyertakan cleanup projection lama, menyebabkan error `GraphAlreadyExists` saat re-run
 - Mengubah query top PageRank agar filter `p.nama <> ''` — menghindari politikus dengan nama kosong muncul di ranking
 - Menambahkan blok `GDS_AVAILABLE = True/False` sebagai flag agar fallback Cypher hanya aktif ketika GDS benar-benar gagal
@@ -512,6 +485,7 @@ Buat kode Neo4j GDS untuk:
 **Model:** `claude-sonnet-4-6` (via claude.ai)
 
 **Prompt yang dipakai:**
+
 ```
 Buat pipeline Text-to-Cypher untuk Neo4j dengan:
 - System prompt berisi schema graf lengkap (node labels, properties, relationship types)
@@ -525,6 +499,7 @@ Buat pipeline Text-to-Cypher untuk Neo4j dengan:
 **Output AI:** Struktur `TEXT_TO_CYPHER_SYSTEM`, fungsi `text_to_cypher()`, dan `ask_graph()` dengan retry logic.
 
 **Modifikasi manual:**
+
 - Menambahkan penanganan `KeyError` dan `Exception` umum secara terpisah pada `text_to_cypher()` — AI hanya generate generic `except Exception` yang tidak memberikan pesan debug yang cukup informatif
 - Menambahkan `return None` pada branch error dan pengecekan `if cypher is None` di `ask_graph()` — tanpa ini, `run_query(None)` akan raise `TypeError` yang membingungkan
 - Memperluas `GRAPH_SCHEMA` dengan menambahkan aturan eksplisit: "Gunakan CONTAINS dan toLower() untuk pencarian nama" dan "Selalu tambahkan LIMIT (max 20)" — diperlukan karena LLM sering generate query case-sensitive atau tanpa LIMIT
@@ -536,6 +511,7 @@ Buat pipeline Text-to-Cypher untuk Neo4j dengan:
 **Model:** `claude-sonnet-4-6` (via claude.ai)
 
 **Prompt yang dipakai:**
+
 ```
 Buat sistem ekstraksi entitas dari teks berita politik Indonesia ke Neo4j.
 LLM harus output JSON dengan format:
@@ -549,6 +525,7 @@ Tangani JSON parsing error dengan fallback struktur kosong.
 **Output AI:** Struktur `GRAPH_BUILDER_SYSTEM` prompt dan fungsi `extract_entities_from_text()` dengan regex JSON parsing.
 
 **Modifikasi manual:**
+
 - Menambahkan `safe_label = re.sub(r'[^A-Za-z]', '', tipe) or "Entity"` — AI tidak menyertakan sanitasi label, padahal tipe dari LLM bisa berisi spasi atau karakter spesial yang invalid sebagai Neo4j label
 - Menambahkan `print(f"Raw LLM Response: {raw[:500]}...")` untuk debugging — krusial saat testing karena LLM free model kadang mengeluarkan teks prefiks sebelum JSON
 - Mengubah parsing flow: coba regex `\{.*\}` dulu, lalu fallback ke `json.loads(raw)` langsung — AI hanya generate satu path parsing yang sering gagal untuk output LLM yang berisi preamble teks
@@ -561,6 +538,7 @@ Tangani JSON parsing error dengan fallback struktur kosong.
 **Model:** `claude-sonnet-4-6` (via claude.ai)
 
 **Prompt yang dipakai:**
+
 ```
 Buat Graph-Augmented RAG pipeline:
 - Fungsi retrieve_graph_context(question) dengan keyword routing:
@@ -574,6 +552,7 @@ Buat Graph-Augmented RAG pipeline:
 **Output AI:** Skeleton `retrieve_graph_context()` dengan beberapa keyword dan `rag_query()` dengan step retrieve-augment-generate.
 
 **Modifikasi manual:**
+
 - Menambahkan 3 query konteks tambahan yang tidak ada di output AI: query PageRank top-10, query network kerabat, dan query komunitas Louvain — penting agar RAG punya konteks faktual yang cukup
 - Menambahkan keyword bahasa Indonesia yang lebih luas pada setiap branch (contoh: `"berpengaruh"`, `"tokoh"`, `"dominan"` → query pagerank) karena AI hanya generate 1–2 keyword per branch
 - Menambahkan penanganan `KeyError` dan `Exception` pada `rag_query()` dengan fallback message informatif — sama seperti komponen lain, AI tidak memisahkan jenis error
@@ -586,6 +565,7 @@ Buat Graph-Augmented RAG pipeline:
 **Model:** `claude-sonnet-4-6` (via claude.ai)
 
 **Prompt yang dipakai:**
+
 ```
 Buat blok evaluasi untuk menguji keempat komponen secara otomatis:
 - Text-to-Cypher: jalankan 3 test case, hitung pass rate
@@ -599,6 +579,7 @@ Buat blok evaluasi untuk menguji keempat komponen secara otomatis:
 **Output AI:** Kerangka evaluasi dengan loop test case dan status PASS/FAIL/EMPTY.
 
 **Modifikasi manual:**
+
 - Menambahkan kolom `elapsed` (timing per test case) pada evaluasi Text-to-Cypher — penting untuk identifikasi query yang lambat
 - Memperbaiki query evaluasi Graph Builder: `count(DISTINCT n.tipe)` untuk tipe unik — AI generate `count(n.tipe)` yang tidak deduplikat
 - Menambahkan `try/except` per blok evaluasi (GDS props check) agar satu komponen yang gagal tidak menghentikan evaluasi komponen lain
@@ -607,15 +588,15 @@ Buat blok evaluasi untuk menguji keempat komponen secara otomatis:
 
 ### Ringkasan Kontribusi AI vs Manual
 
-| Komponen | % Kode dari AI | Modifikasi Utama |
-|----------|---------------|------------------|
-| Koneksi & Helper | ~70% | Header OpenRouter, timeout, error isolation |
-| Import Dataset | ~60% | Null filter, dangling edge guard, KERABAT property |
-| Graph Analytics (GDS) | ~75% | Drop projection guard, nama filter, GDS flag |
-| Text-to-Cypher | ~65% | `return None` guard, error separation, schema rules |
-| Graph Builder | ~60% | Label sanitasi, dual-path JSON parse, debug print |
-| RAG Pipeline | ~55% | Tambah 3 query konteks, keyword expansion, temperature |
-| Evaluasi | ~70% | Timing, distinct fix, per-block try/except |
+| Komponen              | % Kode dari AI | Modifikasi Utama                                       |
+| --------------------- | -------------- | ------------------------------------------------------ |
+| Koneksi & Helper      | ~70%           | Header OpenRouter, timeout, error isolation            |
+| Import Dataset        | ~60%           | Null filter, dangling edge guard, KERABAT property     |
+| Graph Analytics (GDS) | ~75%           | Drop projection guard, nama filter, GDS flag           |
+| Text-to-Cypher        | ~65%           | `return None` guard, error separation, schema rules    |
+| Graph Builder         | ~60%           | Label sanitasi, dual-path JSON parse, debug print      |
+| RAG Pipeline          | ~55%           | Tambah 3 query konteks, keyword expansion, temperature |
+| Evaluasi              | ~70%           | Timing, distinct fix, per-block try/except             |
 
 > Seluruh system prompt untuk LLM (TEXT_TO_CYPHER_SYSTEM, GRAPH_BUILDER_SYSTEM, RAG_SYSTEM) ditulis manual karena kualitas prompt engineering menentukan akurasi output ketiga komponen AI di runtime.
 
