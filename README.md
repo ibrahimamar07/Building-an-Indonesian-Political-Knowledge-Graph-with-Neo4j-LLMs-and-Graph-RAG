@@ -21,9 +21,7 @@ Sistem knowledge graph berbasis Neo4j AuraDB yang memodelkan jaringan politik In
 
 ## Arsitektur Sistem
 
-```
-imagepipeline.png
-```
+![ImagePipeline](./imagepipeline.png)
 
 ### Stack Teknologi
 
